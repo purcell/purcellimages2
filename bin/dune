@@ -1,0 +1,12 @@
+(executable
+ (public_name site)
+ (name site)
+ (modules site db templates)
+ (libraries dream dream-html caqti caqti-driver-postgresql)
+ (preprocess (pps lwt_ppx))
+)
+
+; (rule
+;  (targets templates.ml)
+;  (deps templates.html.ml)
+;  (action (run dream_eml %{deps} --workspace %{workspace_root})))
