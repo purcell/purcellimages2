@@ -30,6 +30,14 @@ let site_css = {|
   ul.thumbs li a { display: block; margin: 0 auto; }
 |}
 
+(* HELPERS *)
+
+let current_year = (Unix.time () |> Unix.gmtime).tm_year + 1900
+let blank_to_option s = if String.equal "" (String.trim s) then None else Some s
+let format_title title = blank_to_option title |> Option.value ~default:"Untitled"
+
+(* TEMPLATES *)
+
 let page (page_title : string) (contents : node list) =
   html [lang "en"] [
     head [] [
@@ -43,31 +51,41 @@ let page (page_title : string) (contents : node list) =
     body [] contents;
     footer [] [
       p [] [
-        txt "Copyright © 2002-2025 Steve Purcell. Reproduction in whole or in part without written permission is prohibited."]
+        txt "Copyright © 2002-%d Steve Purcell. Reproduction in whole or in part without written permission is prohibited." current_year]
     ]
   ]
 
-let format_title title = if String.length title > 0 then title else "Untitled"
-
 let photo (photo : Db.photo_meta) (context : Db.gallery_photo_context) =
-  let page_title = format_title photo.title in
+  let page_title = [
+    Some (format_title photo.title);
+    blank_to_option photo.location;
+    Option.map string_of_int photo.year
+  ] |> List.concat_map Option.to_list |> String.concat ", " in
   page page_title
-    [article [ class_ "photo-page" ] [
+    [ script [ lang "javascript" ] {|
+        document.addEventListener("keyup", function (event) {
+          var to_click = null;
+          if (event.metaKey || event.altKey || event.ctrlKey) return;
+          if (event.keyCode == 37) to_click = document.getElementById("previous-photo");
+          if (event.keyCode == 39) to_click = document.getElementById("next-photo");
+          if (to_click) to_click.click();
+        });
+      |};
+      article [ class_ "photo-page" ] [
         nav [] [
           ul [ class_ "photo-context" ] [
             li []
               (match context.prev_photo with
-               | Some p -> [a [href "/galleries/%s/%d" context.gallery_name p] [txt "← Previous"]]
+               | Some p -> [a [href "/galleries/%s/%d" context.gallery_name p; id "previous-photo"] [txt "← Previous"]]
                | None -> []);
             li [] [a [href "/galleries/%s" context.gallery_name]
                      [txt "%s" context.gallery_title]];
             li []
               (match context.next_photo with
-               | Some p -> [a [href "/galleries/%s/%d" context.gallery_name p] [txt "Next →"]]
+               | Some p -> [a [href "/galleries/%s/%d" context.gallery_name p; id "next-photo"] [txt "Next →"]]
                | None -> []);
           ];
-          h1 [] [txt "%s, %s" page_title photo.location;
-                 (Option.value (Option.map (fun year -> txt ", %d" year) photo.year) ~default:(txt ""))];
+          h1 [] [txt "%s" page_title];
           img [class_ "large"; src "/images/large/%d" photo.id];
           ul [class_ "photo-info"]
             ([photo.camera; photo.lens; photo.film;
