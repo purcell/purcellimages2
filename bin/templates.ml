@@ -86,7 +86,7 @@ let photo (photo : Db.photo_meta) (context : Db.gallery_photo_context) =
                | None -> []);
           ];
           h1 [] [txt "%s" page_title];
-          img [class_ "large"; src "/images/large/%d" photo.id];
+          img [class_ "large"; width "%d" photo.large_width; height "%d" photo.large_height; src "/images/large/%d" photo.id];
           ul [class_ "photo-info"]
             ([photo.camera; photo.lens; photo.film;
               (if String.length photo.tech_comments > 0
@@ -118,7 +118,7 @@ let gallery (gallery : Db.gallery_meta) (photos: Db.gallery_photo_meta list) =
           (List.map
              (fun p ->
                 li [] [a [href "/galleries/%s/%i" gallery.name p.Db.id]
-                         [img [ class_ "thumb"; src "/images/thumbnail/%d" p.id; alt "%s" (format_title p.title)]  ]])
+                         [img [ class_ "thumb"; width "%d" p.thumb_width; height "%d" p.thumb_height; src "/images/thumbnail/%d" p.id; alt "%s" (format_title p.title)]  ]])
              photos)
       ]
     ]
