@@ -1,6 +1,16 @@
+(* From https://github.com/ocurrent/ocaml-ci/pull/760 *)
+let drop_trailing_slash next_handler request =
+  let target = "///" ^ Dream.target request in
+  let path, query = Dream.split_target target in
+  let path = Dream.from_path path |> Dream.drop_trailing_slash |> Dream.to_path in
+  let target = path ^ if query = "" then "" else "?" ^ query in
+  if Dream.target request = target then next_handler request
+  else Dream.redirect request target
+
 let () =
   Dream.run
   @@ Dream.logger
+  @@ drop_trailing_slash
   @@ Dream.sql_pool "postgresql:///purcellimages"
   @@ Dream.router [
 
