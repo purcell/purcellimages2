@@ -14,6 +14,9 @@ let () =
   @@ Dream.sql_pool "postgresql:///purcellimages"
   @@ Dream.router [
 
+    Dream.get "/" (fun _ ->
+        Dream_html.respond Templates.home);
+
     Dream.get "/images/large/:photo_id" (fun req ->
         let photo_id = Dream.param req "photo_id" |> int_of_string in
         let%lwt data = Dream.sql req (Db.get_large_photo_data photo_id) in

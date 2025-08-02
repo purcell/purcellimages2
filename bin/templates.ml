@@ -56,6 +56,19 @@ let page (page_title : string) (contents : node list) =
     ]
   ]
 
+let home =
+  page "Welcome" [
+    h1 [] [ txt "Welcome"];
+    p [] [ txt {| After a long time offline, as of August 2025 I've brought back this site's collection
+                  of photos taken during the early 2000s in locations around the world.|}];
+    p [] [ txt {| Most photos were taken on black and white 35mm film with analog equipment,
+                  usually a Leica M6, and developed, scanned and printed by hand. I became obsessed with manual control,
+                  eventually even abandoning light meters. I preferred to miss a shot than to take multiple frames,
+                  and came to staunchly avoid cropping. |}];
+    p [] [ txt {| The photos are presented in their original rather small and inconsistently-adjusted form.
+                  With luck I will upgrade them in time. |}]
+  ]
+
 let photo (photo : Db.photo_meta) (context : Db.gallery_photo_context) =
   let page_title = [
     Some (format_title photo.title);
