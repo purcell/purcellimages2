@@ -10,7 +10,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, ocaml-overlay }@inputs:
+  outputs = { self, nixpkgs, ocaml-overlay }@inputs:
     (
       let
         forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.platforms.all;
