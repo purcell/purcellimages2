@@ -6,25 +6,21 @@ let site_css = {|
   html { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans",sans-serif; }
   body { background-color: #dadada; }
   footer { margin-top: 5em; font-size: 0.7em; color: #444; border-top: solid 1px #bbb; }
-  header { margin: 1em 0; padding-bottom: 1em; border-bottom: solid 1px #bbb; }
+  header { margin: 1em 0; border-bottom: solid 1px #bbb; }
   a:link, a:visited { color: #401 }
   img.large { display: block; margin: 4em auto; max-width: 100%; height: auto; }
 
   .photo-page { text-align: center; }
   .photo-page h1 { font-size: 1.5em; }
 
-  ul.photo-context { list-style-type: none; padding-left: 0; }
-  ul.photo-context li { display: inline-block; }
-  ul.photo-context li:after { content: " · "; }
-  ul.photo-context li:last-child:after { content: ""; }
-
-  ul.photo-info { list-style-type: none; padding-left: 0; }
-  ul.photo-info li { display: inline-block; }
-  ul.photo-info li:after { content: " · "; }
-  ul.photo-info li:last-child:after { content: ""; }
+  ul.horizontal { list-style-type: none; padding-left: 0; }
+  ul.horizontal li { display: inline-block; }
+  ul.horizontal li:after { content: " · "; }
+  ul.horizontal li:last-child:after { content: ""; }
+  li.primary { font-weight: 600; }
 
   ul.thumbs { padding-left: 0; display: flex; flex-wrap: wrap;
-    gap: 2em 2em;
+    gap: 3em 3em; margin-top: 3em;
   }
   ul.thumbs li { display: flex; flex-wrap: wrap; min-width: 135px; }
   ul.thumbs li a { display: block; margin: 0 auto; }
@@ -46,7 +42,12 @@ let page (page_title : string) (contents : node list) =
       style [ type_ "text/css" ] "%s" site_css
     ];
     header [] [
-      a [href "/"] [txt "Steve Purcell Photography"];
+      nav [] [
+        ul [ class_ "horizontal" ] [
+          li [ class_ "primary" ] [ a [href "/"] [txt "Steve Purcell Photography"] ];
+          li [] [ a [href "/galleries"] [txt "Galleries"] ]
+        ]
+      ]
     ];
     body [] contents;
     footer [] [
@@ -73,21 +74,16 @@ let photo (photo : Db.photo_meta) (context : Db.gallery_photo_context) =
       |};
       article [ class_ "photo-page" ] [
         nav [] [
-          ul [ class_ "photo-context" ] [
-            li []
-              (match context.prev_photo with
-               | Some p -> [a [href "/galleries/%s/%d" context.gallery_name p; id "previous-photo"] [txt "← Previous"]]
-               | None -> []);
-            li [] [a [href "/galleries/%s" context.gallery_name]
-                     [txt "%s" context.gallery_title]];
-            li []
-              (match context.next_photo with
-               | Some p -> [a [href "/galleries/%s/%d" context.gallery_name p; id "next-photo"] [txt "Next →"]]
-               | None -> []);
-          ];
+          ul [ class_ "horizontal" ] (
+            (context.prev_photo |> Option.map (fun p -> li [] [a [href "/galleries/%s/%d" context.gallery_name p; id "previous-photo"] [txt "← Previous"]]) |> Option.to_list)
+            @ [ li [ class_ "primary" ] [a [href "/galleries/%s" context.gallery_name] [txt "%s" context.gallery_title]]]
+            @ (context.next_photo |> Option.map
+                 (fun p -> li [] [a [href "/galleries/%s/%d" context.gallery_name p; id "next-photo"] [txt "Next →"]])
+               |> Option.to_list);
+          );
           h1 [] [txt "%s" page_title];
           img [class_ "large"; width "%d" photo.large_width; height "%d" photo.large_height; src "/images/large/%d" photo.id];
-          ul [class_ "photo-info"]
+          ul [class_ "horizontal"]
             ([photo.camera; photo.lens; photo.film;
               (if String.length photo.tech_comments > 0
                then Some photo.tech_comments else None)]
