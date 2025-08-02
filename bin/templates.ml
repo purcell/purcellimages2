@@ -8,7 +8,7 @@ let site_css = {|
   footer { margin-top: 5em; font-size: 0.7em; color: #444; border-top: solid 1px #bbb; }
   header { margin: 1em 0; padding-bottom: 1em; border-bottom: solid 1px #bbb; }
   a:link, a:visited { color: #401 }
-  img.large { display: block; margin: 4em auto }
+  img.large { display: block; margin: 4em auto; max-width: 100%; height: auto; }
 
   .photo-page { text-align: center; }
   .photo-page h1 { font-size: 1.5em; }
