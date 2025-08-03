@@ -1,3 +1,6 @@
+[![Build Status](https://github.com/purcell/purcellimages2/actions/workflows/ci.yml/badge.svg)](https://github.com/purcell/purcellimages2/actions/workflows/ci.yml)
+<a href="https://www.patreon.com/sanityinc"><img alt="Support me" src="https://img.shields.io/badge/Support%20Me-%F0%9F%92%97-ff69b4.svg"></a>
+
 # Source for [purcellimages.com](https://www.purcellimages.com)
 
 This site was originally written in PHP, and ran for almost two
