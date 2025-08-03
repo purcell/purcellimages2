@@ -80,8 +80,9 @@ let photo (photo : Db.photo_meta) (context : Db.gallery_photo_context) =
         document.addEventListener("keyup", function (event) {
           var to_click = null;
           if (event.metaKey || event.altKey || event.ctrlKey) return;
-          if (event.keyCode == 37) to_click = document.getElementById("previous-photo");
-          if (event.keyCode == 39) to_click = document.getElementById("next-photo");
+          if (event.key == 'ArrowLeft') to_click = document.getElementById("previous-photo");
+          if (event.key == 'ArrowRight') to_click = document.getElementById("next-photo");
+          if (event.key == 'Escape') to_click = document.getElementById("back-to-gallery");
           if (to_click) to_click.click();
         });
       |};
@@ -89,7 +90,7 @@ let photo (photo : Db.photo_meta) (context : Db.gallery_photo_context) =
         nav [] [
           ul [ class_ "horizontal" ] (
             (context.prev_photo |> Option.map (fun p -> li [] [a [href "/galleries/%s/%d" context.gallery_name p; id "previous-photo"] [txt "← Previous"]]) |> Option.to_list)
-            @ [ li [ class_ "primary" ] [a [href "/galleries/%s" context.gallery_name] [txt "%s" context.gallery_title]]]
+            @ [ li [ class_ "primary" ] [a [href "/galleries/%s" context.gallery_name; id "back-to-gallery"] [txt "%s" context.gallery_title]]]
             @ (context.next_photo |> Option.map
                  (fun p -> li [] [a [href "/galleries/%s/%d" context.gallery_name p; id "next-photo"] [txt "Next →"]])
                |> Option.to_list);
