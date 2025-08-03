@@ -1,5 +1,5 @@
 {
-  description = "ICFPC 2024";
+  description = "Purcellimages.com";
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixpkgs-unstable";
