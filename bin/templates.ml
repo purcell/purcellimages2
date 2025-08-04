@@ -46,14 +46,16 @@ let page (page_title : string) (contents : node list) =
       nav [] [
         ul [ class_ "horizontal" ] [
           li [ class_ "primary" ] [ a [href "/"] [txt "Steve Purcell Photography"] ];
-          li [] [ a [href "/galleries"] [txt "Galleries"] ]
+          li [] [ a [href "/galleries"] [txt "Galleries"] ];
+          li [] [ a [href "mailto:contact@purcellimages.com"] [txt "Contact"] ]
         ]
       ]
     ];
     body [] contents;
     footer [] [
       p [] [
-        txt "Copyright © 2002-%d Steve Purcell. Reproduction in whole or in part without written permission is prohibited." current_year]
+        txt "Copyright © 2002-%d Steve Purcell. Reproduction in whole or in part without written permission is prohibited." current_year];
+      a [ href "https://github.com/purcell/purcellimages2" ] [ txt "Source code."]
     ]
   ]
 
