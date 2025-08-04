@@ -22,7 +22,7 @@
         withDepsAndPkgs = f: forAllSystems (system:
             let
               pkgs = import nixpkgs { inherit system; overlays = [ ocaml-overlay.overlays.default ]; };
-              ocamlPackages = pkgs.ocaml-ng.ocamlPackages_latest;
+              ocamlPackages = pkgs.ocaml-ng.ocamlPackages;
               ocamlDeps = with ocamlPackages; [
                 ocaml
                 ocaml-lsp
