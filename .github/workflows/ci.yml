@@ -16,8 +16,4 @@ jobs:
       with:
         ref: ${{ github.head_ref }}
     - uses: cachix/install-nix-action@v31
-    - uses: cachix/cachix-action@v16
-      with:
-        name: purcellimages
-        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: nix build --accept-flake-config ./.
