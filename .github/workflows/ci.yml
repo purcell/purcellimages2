@@ -19,5 +19,5 @@ jobs:
     - uses: cachix/cachix-action@v16
       with:
         name: purcellimages
-        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
-    - run: nix build ./.
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+    - run: nix build --accept-flake-config ./.
