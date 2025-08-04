@@ -47,7 +47,6 @@ let page (page_title : string) (contents : node list) =
         ul [ class_ "horizontal" ] [
           li [ class_ "primary" ] [ a [href "/"] [txt "Steve Purcell Photography"] ];
           li [] [ a [href "/galleries"] [txt "Galleries"] ];
-          li [] [ a [href "mailto:contact@purcellimages.com"] [txt "Contact"] ]
         ]
       ]
     ];
@@ -55,7 +54,11 @@ let page (page_title : string) (contents : node list) =
     footer [] [
       p [] [
         txt "Copyright © 2002-%d Steve Purcell. Reproduction in whole or in part without written permission is prohibited." current_year];
-      a [ href "https://github.com/purcell/purcellimages2" ] [ txt "Source code."]
+      ul [ class_ "horizontal" ] [
+        li [] [ a [href "mailto:contact@purcellimages.com"] [txt "Email me"] ];
+        li [] [ a [href "https://hachyderm.io/@sanityinc"; rel "me"; class_ "mastodon-link" ] [ txt "Follow me on Mastodon" ]];
+        li [] [ a [ href "https://github.com/purcell/purcellimages2" ] [ txt "Source code."] ];
+      ]
     ]
   ]
 
