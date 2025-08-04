@@ -21,9 +21,6 @@
               ocamlDeps = (with ocamlPackages; [
                 ocaml
                 dune_3
-                ocaml-lsp
-                utop
-                ocp-indent
 		dream
 		dream-html
 		caqti-driver-postgresql
@@ -36,7 +33,7 @@
       {
         devShell = withDepsAndPkgs (pkgs: ocamlPackages: ocamlDeps:
             pkgs.mkShell {
-              buildInputs = ocamlDeps ++ [ pkgs.entr ];
+              buildInputs = ocamlDeps ++ [ pkgs.entr ] ++ (with ocamlPackages; [ utop ocaml-lsp ocp-indent ]);
               shellHook = ''
                 export OCAMLRUNPARAM=b
               '';
@@ -48,7 +45,7 @@
             pname = "purcellimages";
             version = "";
             src = ./.;
-            propagatedBuildInputs = ocamlDeps;
+            buildInputs = ocamlDeps;
           }
         ); 
       }
