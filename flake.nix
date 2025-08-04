@@ -10,6 +10,11 @@
     };
   };
 
+  nixConfig = {
+    extra-substituters = "https://purcellimages.cachix.org";
+    extra-trusted-public-keys = "purcellimages.cachix.org-1:nt4djy3HAPOP/kGqQRC7poriLCD23nkUG+37OxeVtR8=";
+  };
+
   outputs = { self, nixpkgs, ocaml-overlay }@inputs:
     (
       let

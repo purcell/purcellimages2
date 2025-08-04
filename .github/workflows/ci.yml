@@ -16,4 +16,8 @@ jobs:
       with:
         ref: ${{ github.head_ref }}
     - uses: cachix/install-nix-action@v31
+    - uses: cachix/cachix-action@v16
+      with:
+        name: purcellimages
+        signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
     - run: nix build ./.
