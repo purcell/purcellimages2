@@ -68,7 +68,7 @@ let home =
                   usually a Leica M6, and developed, scanned and printed by hand. I became obsessed with manual control,
                   eventually even abandoning light meters. I preferred to miss a shot than to take multiple frames,
                   and came to staunchly avoid cropping. |}];
-    p [] [ txt {| The photos are presented in their original rather small and inconsistently-adjusted form.
+    p [] [ txt {| The photos are presented in their original rather small and inconsistently-adjusted form — quirky borders and all.
                   With luck I will upgrade them in time. |}]
   ]
 
