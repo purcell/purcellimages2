@@ -3,11 +3,6 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixpkgs-unstable";
-
-    ocaml-overlay = {
-      url = "github:nix-ocaml/nix-overlays";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   nixConfig = {
@@ -15,25 +10,26 @@
     extra-trusted-public-keys = "purcellimages.cachix.org-1:nt4djy3HAPOP/kGqQRC7poriLCD23nkUG+37OxeVtR8=";
   };
 
-  outputs = { self, nixpkgs, ocaml-overlay }@inputs:
+  outputs = { self, nixpkgs }@inputs:
     (
       let
         forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.platforms.all;
         withDepsAndPkgs = f: forAllSystems (system:
             let
-              pkgs = import nixpkgs { inherit system; overlays = [ ocaml-overlay.overlays.default ]; };
-              ocamlPackages = pkgs.ocaml-ng.ocamlPackages;
-              ocamlDeps = with ocamlPackages; [
+              pkgs = import nixpkgs { inherit system; };
+              ocamlPackages = pkgs.ocamlPackages;
+              ocamlDeps = (with ocamlPackages; [
                 ocaml
+                dune_3
                 ocaml-lsp
-                dune
                 utop
                 ocp-indent
 		dream
 		dream-html
 		caqti-driver-postgresql
                 ppx_deriving
-              ];
+                lwt_ppx
+              ]);
             in f pkgs ocamlPackages ocamlDeps
            );
       in
