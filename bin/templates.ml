@@ -39,7 +39,8 @@ let page (page_title : string) (contents : node list) =
     head [] [
       meta [charset "utf-8"];
       title [] "%s | Steve Purcell Photography" page_title;
-      style [ type_ "text/css" ] "%s" site_css
+      style [ type_ "text/css" ] "%s" site_css;
+      script [ defer; string_attr "data-domain" "purcellimages.com"; src "https://plausible.io/js/script.js" ] "";
     ];
     header [] [
       nav [] [
