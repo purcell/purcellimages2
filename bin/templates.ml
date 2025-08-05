@@ -2,10 +2,9 @@ open Dream_html
 open HTML
 
 let site_css = {|
-  html * { color: #222 }
-  html { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",Arial,"Noto Sans",sans-serif; }
+  html { color: #222; font-family: ui-rounded, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; }
   body { background-color: #dadada; }
-  footer { margin-top: 5em; font-size: 0.7em; color: #444; border-top: solid 1px #bbb; }
+  footer { margin-top: 5em; font-size: 0.8em; color: #444; border-top: solid 1px #bbb; }
   header { margin: 1em 0; border-bottom: solid 1px #bbb; }
   a:link, a:visited { color: #401 }
   img.large { display: block; margin: 4em auto; max-width: 100%; height: auto; }
@@ -37,7 +36,8 @@ let format_title title = blank_to_option title |> Option.value ~default:"Untitle
 let page (page_title : string) (contents : node list) =
   html [lang "en"] [
     head [] [
-      meta [charset "utf-8"];
+      meta [ charset "utf-8" ];
+      meta [ name "viewport"; content "width=device-width, initial-scale=1, viewport-fit=cover" ];
       title [] "%s | Steve Purcell Photography" page_title;
       style [ type_ "text/css" ] "%s" site_css;
       script [ defer; string_attr "data-domain" "purcellimages.com"; src "https://plausible.io/js/script.js" ] "";
@@ -54,11 +54,12 @@ let page (page_title : string) (contents : node list) =
     footer [] [
       p [] [
         txt "Copyright © 2002-%d Steve Purcell. Reproduction in whole or in part without written permission is prohibited." current_year];
-      ul [ class_ "horizontal" ] [
-        li [] [ a [href "mailto:contact@purcellimages.com"] [txt "Email me"] ];
-        li [] [ a [href "https://hachyderm.io/@sanityinc"; rel "me"; class_ "mastodon-link" ] [ txt "Follow me on Mastodon" ]];
-        li [] [ a [ href "https://github.com/purcell/purcellimages2" ] [ txt "Source code."] ];
-      ]
+      nav [] [
+        ul [ class_ "horizontal" ] [
+          li [] [ a [href "mailto:contact@purcellimages.com"] [txt "Email me"] ];
+          li [] [ a [href "https://hachyderm.io/@sanityinc"; rel "me"; class_ "mastodon-link" ] [ txt "Follow me on Mastodon" ]];
+          li [] [ a [ href "https://github.com/purcell/purcellimages2" ] [ txt "Source code"] ];
+        ]]
     ]
   ]
 
@@ -72,7 +73,8 @@ let home =
                   eventually even abandoning light meters. I preferred to miss a shot than to take multiple frames,
                   and came to staunchly avoid cropping. |}];
     p [] [ txt {| The photos are presented in their original rather small and inconsistently-adjusted form — quirky borders and all.
-                  With luck I will upgrade them in time. |}]
+                  With luck I will upgrade them in time. |}];
+    p [] [ a [ href "/galleries" ] [ txt "To the galleries →" ]]
   ]
 
 let photo (photo : Db.photo_meta) (context : Db.gallery_photo_context) =
@@ -100,16 +102,16 @@ let photo (photo : Db.photo_meta) (context : Db.gallery_photo_context) =
             @ (context.next_photo |> Option.map
                  (fun p -> li [] [a [href "/galleries/%s/%d" context.gallery_name p; id "next-photo"] [txt "Next →"]])
                |> Option.to_list);
-          );
-          h1 [] [txt "%s" page_title];
-          img [class_ "large"; width "%d" photo.large_width; height "%d" photo.large_height; src "/images/large/%d" photo.id];
-          ul [class_ "horizontal"]
-            ([photo.camera; photo.lens; photo.film;
-              (if String.length photo.tech_comments > 0
-               then Some photo.tech_comments else None)]
-             |> List.concat_map Option.to_list |> List.map (fun i -> li [] [txt "%s" i])
-            )
-        ]
+          )
+        ];
+        h1 [] [txt "%s" page_title];
+        img [class_ "large"; width "%d" photo.large_width; height "%d" photo.large_height; src "/images/large/%d" photo.id];
+        ul [class_ "horizontal"]
+          ([photo.camera; photo.lens; photo.film;
+            (if String.length photo.tech_comments > 0
+             then Some photo.tech_comments else None)]
+           |> List.concat_map Option.to_list |> List.map (fun i -> li [] [txt "%s" i])
+          )
       ]
     ]
 
@@ -127,14 +129,14 @@ let galleries (galleries : Db.gallery_meta list) =
 
 let gallery (gallery : Db.gallery_meta) (photos: Db.gallery_photo_meta list) =
   page gallery.title
-    [article [] [
-        h1 [] [txt "%s" gallery.title];
-        p [] [ txt "%s" gallery.summary ];
-        ul [class_ "thumbs"]
-          (List.map
-             (fun p ->
-                li [] [a [href "/galleries/%s/%i" gallery.name p.Db.id]
-                         [img [ class_ "thumb"; width "%d" p.thumb_width; height "%d" p.thumb_height; src "/images/thumbnail/%d" p.id; alt "%s" (format_title p.title)]  ]])
-             photos)
-      ]
+    [ article [] [
+          h1 [] [txt "%s" gallery.title];
+          p [] [ txt "%s" gallery.summary ];
+          ul [class_ "thumbs"]
+            (List.map
+               (fun p ->
+                  li [] [a [href "/galleries/%s/%i" gallery.name p.Db.id]
+                           [img [ class_ "thumb"; width "%d" p.thumb_width; height "%d" p.thumb_height; src "/images/thumbnail/%d" p.id; alt "%s" (format_title p.title)]  ]])
+               photos)
+        ]
     ]
