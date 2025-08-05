@@ -7,6 +7,9 @@ let drop_trailing_slash next_handler request =
   if Dream.target request = target then next_handler request
   else Dream.redirect request target
 
+let site_base_url req =
+  "https://" ^ (Dream.header req "host" |> Option.value ~default:"127.0.0.1") ^ "/"
+
 let () =
   Dream.run
   @@ Dream.logger
@@ -46,6 +49,6 @@ let () =
         let photo_id = Dream.param req "photo_id" |> int_of_string in
         let%lwt meta = Dream.sql req (Db.get_photo_meta photo_id) in
         let%lwt context = Dream.sql req (Db.get_gallery_photo_context name photo_id) in
-        Dream_html.respond (Templates.photo meta context);
+        Dream_html.respond (Templates.photo (site_base_url req) meta context);
       );
   ]

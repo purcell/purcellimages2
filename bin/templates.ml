@@ -33,15 +33,18 @@ let format_title title = blank_to_option title |> Option.value ~default:"Untitle
 
 (* TEMPLATES *)
 
-let page (page_title : string) (contents : node list) =
+let page ?(extra_head = []) (page_title : string) (contents : node list) =
   html [lang "en"] [
-    head [] [
-      meta [ charset "utf-8" ];
-      meta [ name "viewport"; content "width=device-width, initial-scale=1, viewport-fit=cover" ];
-      title [] "%s | Steve Purcell Photography" page_title;
-      style [ type_ "text/css" ] "%s" site_css;
-      script [ defer; string_attr "data-domain" "purcellimages.com"; src "https://plausible.io/js/script.js" ] "";
-    ];
+    head [] ([
+        meta [ charset "utf-8" ];
+        meta [ name "viewport"; content "width=device-width, initial-scale=1, viewport-fit=cover" ];
+        title [] "%s | Steve Purcell Photography" page_title;
+        meta [ string_attr "property" "og:title"; content "%s" page_title; ];
+        meta [ string_attr "property" "og:site_name"; content "Steve Purcell Photography"; ];
+        meta [ string_attr "property" "og:type"; content "article"; ];
+        style [ type_ "text/css" ] "%s" site_css;
+        script [ defer; string_attr "data-domain" "purcellimages.com"; src "https://plausible.io/js/script.js" ] "";
+      ] @ extra_head);
     header [] [
       nav [] [
         ul [ class_ "horizontal" ] [
@@ -77,13 +80,18 @@ let home =
     p [] [ a [ href "/galleries" ] [ txt "To the galleries →" ]]
   ]
 
-let photo (photo : Db.photo_meta) (context : Db.gallery_photo_context) =
+let photo base_url (photo : Db.photo_meta) (context : Db.gallery_photo_context) =
   let page_title = [
     Some (format_title photo.title);
     blank_to_option photo.location;
     Option.map string_of_int photo.year
   ] |> List.concat_map Option.to_list |> String.concat ", " in
-  page page_title
+  let og_tags = [
+    meta [ string_attr "property" "og:url"; content "%s/galleries/%s/%d" base_url context.gallery_name photo.id ];
+    meta [ string_attr "property" "og:image"; content "%s/images/large/%d" base_url photo.id;];
+  ] in
+  page ~extra_head:og_tags
+    page_title
     [ script [ lang "javascript" ] {|
         document.addEventListener("keyup", function (event) {
           var to_click = null;
