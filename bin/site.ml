@@ -8,7 +8,7 @@ let drop_trailing_slash next_handler request =
   else Dream.redirect request target
 
 let site_base_url req =
-  "https://" ^ (Dream.header req "host" |> Option.value ~default:"127.0.0.1") ^ "/"
+  "https://" ^ (Dream.header req "host" |> Option.value ~default:"127.0.0.1")
 
 let () =
   Dream.run
