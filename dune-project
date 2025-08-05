@@ -14,7 +14,6 @@
 (package
  (name purcellimages)
  (synopsis "Photo website")
- (description "Photo website")
- (depends ocaml dune dream))
+ (description "Photo website"))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
