@@ -94,7 +94,7 @@ let photo base_url (photo : Db.photo_meta) (context : Db.gallery_photo_context) 
   ] in
   page ~extra_head:og_tags
     page_title
-    [ script [ lang "javascript" ] {|
+    [ script [ async; lang "javascript" ] {|
         document.addEventListener("keyup", function (event) {
           var to_click = null;
           if (event.metaKey || event.altKey || event.ctrlKey) return;
