@@ -89,6 +89,8 @@ let photo base_url (photo : Db.photo_meta) (context : Db.gallery_photo_context) 
   let og_tags = [
     meta [ string_attr "property" "og:url"; content "%s/galleries/%s/%d" base_url context.gallery_name photo.id ];
     meta [ string_attr "property" "og:image"; content "%s/images/large/%d" base_url photo.id;];
+    meta [ string_attr "property" "og:image:width"; content "%d" photo.large_width;];
+    meta [ string_attr "property" "og:image:height"; content "%d" photo.large_height;];
   ] in
   page ~extra_head:og_tags
     page_title
