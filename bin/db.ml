@@ -2,20 +2,23 @@ module type DB = Caqti_lwt.CONNECTION
 module T = Caqti_type
 open Caqti_request.Infix
 
+let queryOne q f = let open Lwt in q >>= Caqti_lwt.or_fail >|= f
+let queryMany q f = queryOne q (fun items -> List.map f items)
+
 type photo_meta = {
-    id : int;
-    title : string;
-    year: int option;
-    month: int option;
-    day: int option;
-    camera: string option;
-    film: string option;
-    lens: string option;
-    tech_comments: string;
-    location: string;
-    large_width: int;
-    large_height: int;
-  }
+  id : int;
+  title : string;
+  year: int option;
+  month: int option;
+  day: int option;
+  camera: string option;
+  film: string option;
+  lens: string option;
+  tech_comments: string;
+  location: string;
+  large_width: int;
+  large_height: int;
+}
 
 let get_photo_meta photo_id =
   let query =
@@ -34,10 +37,9 @@ let get_photo_meta photo_id =
          WHERE p.id = ?
       |} in
   fun (module Db : DB) ->
-    let%lwt meta_or_error = Db.find query photo_id in
-    match%lwt Caqti_lwt.or_fail meta_or_error with
-    | (id, title, year, month, day, camera, film, lens, tech_comments, location, large_width, large_height) ->
-        Lwt.return { id; title; year; month; day; camera; film; lens; tech_comments; location; large_width; large_height };;
+    queryOne (Db.find query photo_id)
+      (fun (id, title, year, month, day, camera, film, lens, tech_comments, location, large_width, large_height) ->
+         { id; title; year; month; day; camera; film; lens; tech_comments; location; large_width; large_height });;
 
 let get_large_photo_data photo_id =
   let query =
@@ -48,8 +50,7 @@ let get_large_photo_data photo_id =
          WHERE id = (SELECT large_data FROM photo WHERE id = ?)
       |} in
   fun (module Db : DB) ->
-    let%lwt meta_or_error = Db.find query photo_id in
-    Caqti_lwt.or_fail meta_or_error
+    Lwt.bind (Db.find query photo_id) Caqti_lwt.or_fail
 
 let get_thumbnail_photo_data photo_id =
   let query =
@@ -60,16 +61,15 @@ let get_thumbnail_photo_data photo_id =
          WHERE id = (SELECT thumbnail_data FROM photo WHERE id = ?)
       |} in
   fun (module Db : DB) ->
-    let%lwt meta_or_error = Db.find query photo_id in
-    Caqti_lwt.or_fail meta_or_error
+    Lwt.bind (Db.find query photo_id) Caqti_lwt.or_fail
 
 type gallery_meta = {
-    id: int;
-    name: string;
-    title: string;
-    summary: string;
-    cover_photo_id: int option;
-  }
+  id: int;
+  name: string;
+  title: string;
+  summary: string;
+  cover_photo_id: int option;
+}
 
 let get_galleries =
   let query =
@@ -81,12 +81,10 @@ let get_galleries =
          ORDER BY array_position(array['primary', 'featured', 'listed'], visibility) ASC, seq ASC
       |} in
   fun (module Db : DB) ->
-    let%lwt meta_or_error = Db.collect_list query () in
-    let%lwt items = Caqti_lwt.or_fail meta_or_error in
-    Lwt.return (List.map
+    queryMany (Db.collect_list query ())
       (fun (id, name, title, summary, cover_photo_id) ->
-        { id; name; title; summary; cover_photo_id }
-      ) items)
+         { id; name; title; summary; cover_photo_id }
+      )
 
 let get_gallery_meta name =
   let query =
@@ -98,20 +96,19 @@ let get_gallery_meta name =
            AND name = ?
       |} in
   fun (module Db : DB) ->
-    let%lwt meta_or_error = Db.find query name in
-    match%lwt Caqti_lwt.or_fail meta_or_error with
-    | (id, name, title, summary, cover_photo_id) ->
-        Lwt.return { id; name; title; summary; cover_photo_id }
+    queryOne (Db.find query name)
+      (fun (id, name, title, summary, cover_photo_id) ->
+         { id; name; title; summary; cover_photo_id })
 
 type gallery_photo_meta = {
-    id: int;
-    title: string;
-    thumb_width: int;
-    thumb_height: int;
-  }
+  id: int;
+  title: string;
+  thumb_width: int;
+  thumb_height: int;
+}
 
 let get_gallery_photos name =
-    let query =
+  let query =
     (T.string ->* T.(t4 int string int int))
       {|
         SELECT p.id, p.title, d.width as thumb_width, d.height as thumb_height
@@ -123,19 +120,19 @@ let get_gallery_photos name =
          ORDER BY gp.seq ASC
       |} in
   fun (module Db : DB) ->
-    let%lwt meta_or_error = Db.collect_list query name in
-    let%lwt items = Caqti_lwt.or_fail meta_or_error in
-    Lwt.return (List.map (fun (id, title, thumb_width, thumb_height) -> { id; title; thumb_width; thumb_height }) items)
+    queryMany (Db.collect_list query name)
+      (fun (id, title, thumb_width, thumb_height) ->
+         { id; title; thumb_width; thumb_height })
 
 type gallery_photo_context = {
-    gallery_name: string;
-    gallery_title: string;
-    prev_photo: int option;
-    next_photo: int option;
-  }
+  gallery_name: string;
+  gallery_title: string;
+  prev_photo: int option;
+  next_photo: int option;
+}
 
 let get_gallery_photo_context name photo_id =
-    let query =
+  let query =
     (T.(t2 string int) ->! T.(t4 string string (option int) (option int)))
       {|
         WITH photos AS (
@@ -152,8 +149,7 @@ let get_gallery_photo_context name photo_id =
         SELECT gallery_name, gallery_title, prev_photo, next_photo
           FROM photos WHERE photo = ?
       |} in
-    fun (module Db : DB) ->
-      let%lwt res = Db.find query (name, photo_id) in
-      match%lwt Caqti_lwt.or_fail res with
-      | (gallery_name, gallery_title, prev_photo, next_photo) ->
-        Lwt.return { gallery_name; gallery_title; prev_photo; next_photo }
+  fun (module Db : DB) ->
+    queryOne (Db.find query (name, photo_id))
+      (fun (gallery_name, gallery_title, prev_photo, next_photo) ->
+         { gallery_name; gallery_title; prev_photo; next_photo })
