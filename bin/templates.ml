@@ -25,6 +25,36 @@ let site_css = {|
   ul.thumbs li a { display: block; margin: 0 auto; }
 |}
 
+let navigation_js = script [ async; lang "javascript" ] {|
+  function nav_up() { document.getElementById("nav-up").click(); }
+  function nav_next() { document.getElementById("nav-next").click(); }
+  function nav_prev() { document.getElementById("nav-prev").click(); }
+  document.addEventListener("keyup", function (event) {
+    if (event.metaKey || event.altKey || event.ctrlKey) return;
+    if (event.key == 'ArrowLeft') return nav_prev();
+    if (event.key == 'ArrowRight') return nav_next();
+    if (event.key == 'Escape') return nav_up();
+  });
+  var touches = {};
+  document.addEventListener("touchstart", function(event) {
+    var touch = event.changedTouches[0];
+    touches[event.changedTouches[0].identifier] = function(end_touch) {
+      var dx = end_touch.screenX - touch.screenX;
+      var dy = end_touch.screenY - touch.screenY;
+      if ( Math.abs(dy) > Math.abs(dx) ) return;
+      if ( dx < 0 ) return nav_next();
+      if ( dx > 0 ) return nav_prev();
+    };
+  });
+  document.addEventListener("touchend", function(event) {
+    var touch = event.changedTouches[0];
+    touches[touch.identifier](touch);
+  });
+  document.addEventListener("touchcancel", function(event) {
+    touches.removeAttribute(event.target.changedTouches[0]);
+  });
+|}
+
 (* HELPERS *)
 
 let current_year = (Unix.time () |> Unix.gmtime).tm_year + 1900
@@ -94,41 +124,14 @@ let photo base_url (photo : Db.photo_meta) (context : Db.gallery_photo_context) 
   ] in
   page ~extra_head:og_tags
     page_title
-    [ script [ async; lang "javascript" ] {|
-        document.addEventListener("keyup", function (event) {
-          var to_click = null;
-          if (event.metaKey || event.altKey || event.ctrlKey) return;
-          if (event.key == 'ArrowLeft') to_click = document.getElementById("previous-photo");
-          if (event.key == 'ArrowRight') to_click = document.getElementById("next-photo");
-          if (event.key == 'Escape') to_click = document.getElementById("back-to-gallery");
-          if (to_click) to_click.click();
-        });
-        var touches = {};
-        document.addEventListener("touchstart", function(event) {
-          var touch = event.changedTouches[0];
-          touches[event.changedTouches[0].identifier] = function(end_touch) {
-            var dx = end_touch.screenX - touch.screenX;
-            var dy = end_touch.screenY - touch.screenY;
-            if ( Math.abs(dy) > Math.abs(dx) ) return;
-            if ( dx < 0 ) return document.getElementById("next-photo").click();
-            if ( dx > 0 ) return document.getElementById("previous-photo").click();
-          };
-        });
-        document.addEventListener("touchend", function(event) {
-          var touch = event.changedTouches[0];
-          touches[touch.identifier](touch);
-        });
-        document.addEventListener("touchcancel", function(event) {
-          touches.removeAttribute(event.target.changedTouches[0]);
-        });
-      |};
+    [ navigation_js;
       article [ class_ "photo-page" ] [
         nav [] [
           ul [ class_ "horizontal" ] (
-            (context.prev_photo |> Option.map (fun p -> li [] [a [href "/galleries/%s/%d" context.gallery_name p; id "previous-photo"] [txt "← Previous"]]) |> Option.to_list)
-            @ [ li [ class_ "primary" ] [a [href "/galleries/%s" context.gallery_name; id "back-to-gallery"] [txt "%s" context.gallery_title]]]
+            (context.prev_photo |> Option.map (fun p -> li [] [a [href "/galleries/%s/%d" context.gallery_name p; id "nav-prev"] [txt "← Previous"]]) |> Option.to_list)
+            @ [ li [ class_ "primary" ] [a [href "/galleries/%s" context.gallery_name; id "nav-up"] [txt "%s" context.gallery_title]]]
             @ (context.next_photo |> Option.map
-                 (fun p -> li [] [a [href "/galleries/%s/%d" context.gallery_name p; id "next-photo"] [txt "Next →"]])
+                 (fun p -> li [] [a [href "/galleries/%s/%d" context.gallery_name p; id "nav-next"] [txt "Next →"]])
                |> Option.to_list);
           )
         ];
