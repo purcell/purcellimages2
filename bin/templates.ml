@@ -26,9 +26,10 @@ let site_css = {|
 |}
 
 let navigation_js = script [ async; lang "javascript" ] {|
-  function nav_up() { document.getElementById("nav-up").click(); }
-  function nav_next() { document.getElementById("nav-next").click(); }
-  function nav_prev() { document.getElementById("nav-prev").click(); }
+  function nav_click(id) { document.getElementById(id)?.click(); }
+  function nav_up() { nav_click("nav-up"); }
+  function nav_next() { nav_click("nav-next"); }
+  function nav_prev() { nav_click("nav-prev"); }
   document.addEventListener("keyup", function (event) {
     if (event.metaKey || event.altKey || event.ctrlKey) return;
     if (event.key == 'ArrowLeft') return nav_prev();
