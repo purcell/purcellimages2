@@ -13,9 +13,9 @@ let site_base_url req =
 let handle_image loader req  = let photo_id = Dream.param req "photo_id" |> int_of_string in
   let%lwt data = Dream.sql req (loader photo_id) in
   let etag = Digest.MD5.(string data |> to_hex) in
-  if Dream.header req "If-None-Match" |> Option.map (fun h -> h = etag) |> Option.value ~default:false
-  then Dream.empty `Not_Modified
-  else Dream.respond ~headers:[("Content-Type", "image/jpeg"); ("ETag", etag)] data
+  match Dream.header req "If-None-Match" with
+  | Some t when t = etag -> Dream.empty `Not_Modified
+  | _ -> Dream.respond ~headers:[("Content-Type", "image/jpeg"); ("ETag", etag)] data
 
 let () =
   Dream.run
