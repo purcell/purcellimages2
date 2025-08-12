@@ -42,8 +42,8 @@ let navigation_js = script [ async; lang "javascript" ] {|
       var dx = end_touch.screenX - touch.screenX;
       var dy = end_touch.screenY - touch.screenY;
       if ( Math.abs(dy) > Math.abs(dx) ) return;
-      if ( dx < 0 ) return nav_next();
-      if ( dx > 0 ) return nav_prev();
+      if ( dx < -40 ) return nav_next();
+      if ( dx >  40 ) return nav_prev();
     };
   });
   document.addEventListener("touchend", function(event) {
