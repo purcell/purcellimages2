@@ -103,6 +103,24 @@ let photo base_url (photo : Db.photo_meta) (context : Db.gallery_photo_context) 
           if (event.key == 'Escape') to_click = document.getElementById("back-to-gallery");
           if (to_click) to_click.click();
         });
+        var touches = {};
+        document.addEventListener("touchstart", function(event) {
+          var touch = event.changedTouches[0];
+          touches[event.changedTouches[0].identifier] = function(end_touch) {
+            var dx = end_touch.screenX - touch.screenX;
+            var dy = end_touch.screenY - touch.screenY;
+            if ( Math.abs(dy) > Math.abs(dx) ) return;
+            if ( dx < 0 ) return document.getElementById("next-photo").click();
+            if ( dx > 0 ) return document.getElementById("previous-photo").click();
+          };
+        });
+        document.addEventListener("touchend", function(event) {
+          var touch = event.changedTouches[0];
+          touches[touch.identifier](touch);
+        });
+        document.addEventListener("touchcancel", function(event) {
+          touches.removeAttribute(event.target.changedTouches[0]);
+        });
       |};
       article [ class_ "photo-page" ] [
         nav [] [
