@@ -10,6 +10,13 @@ let drop_trailing_slash next_handler request =
 let site_base_url req =
   "https://" ^ (Dream.header req "host" |> Option.value ~default:"127.0.0.1")
 
+let handle_image loader req  = let photo_id = Dream.param req "photo_id" |> int_of_string in
+  let%lwt data = Dream.sql req (loader photo_id) in
+  let etag = Digest.MD5.(string data |> to_hex) in
+  if Dream.header req "If-None-Match" |> Option.map (fun h -> h = etag) |> Option.value ~default:false
+  then Dream.empty `Not_Modified
+  else Dream.respond ~headers:[("Content-Type", "image/jpeg"); ("ETag", etag)] data
+
 let () =
   Dream.run
   @@ Dream.logger
@@ -20,17 +27,9 @@ let () =
     Dream.get "/" (fun _ ->
         Dream_html.respond Templates.home);
 
-    Dream.get "/images/large/:photo_id" (fun req ->
-        let photo_id = Dream.param req "photo_id" |> int_of_string in
-        let%lwt data = Dream.sql req (Db.get_large_photo_data photo_id) in
-        Dream.respond ~headers:[("Content-Type", "image/jpeg")] data
-      );
+    Dream.get "/images/large/:photo_id" (handle_image Db.get_large_photo_data);
 
-    Dream.get "/images/thumbnail/:photo_id" (fun req ->
-        let photo_id = Dream.param req "photo_id" |> int_of_string in
-        let%lwt data = Dream.sql req (Db.get_thumbnail_photo_data photo_id) in
-        Dream.respond ~headers:[("Content-Type", "image/jpeg")] data
-      );
+    Dream.get "/images/thumbnail/:photo_id" (handle_image Db.get_thumbnail_photo_data);
 
     Dream.get "/galleries/:name" (fun req ->
         let name = Dream.param req "name" in
