@@ -6,7 +6,8 @@ let site_css = {|
   body { background-color: #dadada; }
   footer { margin-top: 5em; font-size: 0.8em; color: #444; border-top: solid 1px #bbb; }
   header { margin: 1em 0; border-bottom: solid 1px #bbb; }
-  a:link, a:visited { color: #401 }
+  a:link, a:visited { color: #603; text-decoration: none; }
+  a:hover { text-decoration: underline; }
   img.large { display: block; margin: 4em auto; max-width: 100%; height: auto; }
 
   .photo-page { text-align: center; }
