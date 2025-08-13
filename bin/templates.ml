@@ -3,7 +3,7 @@ open HTML
 
 let site_css = {|
   html { color: #222; font-family: ui-rounded, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; }
-  body { background-color: #dadada; }
+  body { background-color: #dadada; margin: 1em; }
   footer { margin-top: 5em; font-size: 0.8em; color: #444; border-top: solid 1px #bbb; }
   header { margin: 1em 0; border-bottom: solid 1px #bbb; }
   a:link, a:visited { color: #603; text-decoration: none; }
@@ -77,24 +77,26 @@ let page ?(extra_head = []) (page_title : string) (contents : node list) =
         style [ type_ "text/css" ] "%s" site_css;
         script [ defer; string_attr "data-domain" "purcellimages.com"; src "https://plausible.io/js/script.js" ] "";
       ] @ extra_head);
-    header [] [
-      nav [] [
-        ul [ class_ "horizontal" ] [
-          li [ class_ "primary" ] [ a [href "/"] [txt "Steve Purcell Photography"] ];
-          li [] [ a [href "/galleries"] [txt "Galleries"] ];
+    body [] [
+      header [] [
+        nav [] [
+          ul [ class_ "horizontal" ] [
+            li [ class_ "primary" ] [ a [href "/"] [txt "Steve Purcell Photography"] ];
+            li [] [ a [href "/galleries"] [txt "Galleries"] ];
+          ]
         ]
+      ];
+      section [ id "contents" ] contents;
+      footer [] [
+        p [] [
+          txt "Copyright © 2002-%d Steve Purcell. Reproduction in whole or in part without written permission is prohibited." current_year];
+        nav [] [
+          ul [ class_ "horizontal" ] [
+            li [] [ a [href "mailto:contact@purcellimages.com"] [txt "Email me"] ];
+            li [] [ a [href "https://hachyderm.io/@sanityinc"; rel "me"; class_ "mastodon-link" ] [ txt "Follow me on Mastodon" ]];
+            li [] [ a [ href "https://github.com/purcell/purcellimages2" ] [ txt "Source code"] ];
+          ]]
       ]
-    ];
-    body [] contents;
-    footer [] [
-      p [] [
-        txt "Copyright © 2002-%d Steve Purcell. Reproduction in whole or in part without written permission is prohibited." current_year];
-      nav [] [
-        ul [ class_ "horizontal" ] [
-          li [] [ a [href "mailto:contact@purcellimages.com"] [txt "Email me"] ];
-          li [] [ a [href "https://hachyderm.io/@sanityinc"; rel "me"; class_ "mastodon-link" ] [ txt "Follow me on Mastodon" ]];
-          li [] [ a [ href "https://github.com/purcell/purcellimages2" ] [ txt "Source code"] ];
-        ]]
     ]
   ]
 
