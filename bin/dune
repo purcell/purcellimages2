@@ -2,8 +2,11 @@
  (public_name site)
  (name site)
  (modules site db templates)
- (libraries dream dream-html caqti caqti-driver-postgresql)
- (preprocess (pps lwt_ppx))
+ (libraries dream dream-html caqti caqti-driver-postgresql ppx_blob)
+ (preprocess (pps lwt_ppx ppx_blob))
+ (preprocessor_deps
+  (file site.css)
+  (file nav.js))
 )
 
 ; (rule

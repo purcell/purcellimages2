@@ -1,62 +1,6 @@
 open Dream_html
 open HTML
 
-let site_css = {|
-  html { color: #222; font-family: ui-rounded, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; }
-  body { background-color: #dadada; margin: 1em; }
-  footer { margin-top: 5em; font-size: 0.8em; color: #444; border-top: solid 1px #bbb; }
-  header { margin: 1em 0; border-bottom: solid 1px #bbb; }
-  a:link, a:visited { color: #603; text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  img.large { display: block; margin: 4em auto; max-width: 100%; height: auto; }
-
-  .photo-page { text-align: center; }
-  .photo-page h1 { font-size: 1.5em; }
-
-  ul.horizontal { list-style-type: none; padding-left: 0; }
-  ul.horizontal li { display: inline-block; }
-  ul.horizontal li:after { content: " · "; }
-  ul.horizontal li:last-child:after { content: ""; }
-  li.primary { font-weight: 600; }
-
-  ul.thumbs { padding-left: 0; display: flex; flex-wrap: wrap;
-    gap: 3em 3em; margin-top: 3em;
-  }
-  ul.thumbs li { display: flex; flex-wrap: wrap; min-width: 135px; }
-  ul.thumbs li a { display: block; margin: 0 auto; }
-|}
-
-let navigation_js = script [ async; lang "javascript" ] {|
-  function nav_click(id) { document.getElementById(id)?.click(); }
-  function nav_up() { nav_click("nav-up"); }
-  function nav_next() { nav_click("nav-next"); }
-  function nav_prev() { nav_click("nav-prev"); }
-  document.addEventListener("keyup", function (event) {
-    if (event.metaKey || event.altKey || event.ctrlKey) return;
-    if (event.key == 'ArrowLeft') return nav_prev();
-    if (event.key == 'ArrowRight') return nav_next();
-    if (event.key == 'Escape') return nav_up();
-  });
-  var touches = {};
-  document.addEventListener("touchstart", function(event) {
-    var touch = event.changedTouches[0];
-    touches[event.changedTouches[0].identifier] = function(end_touch) {
-      var dx = end_touch.screenX - touch.screenX;
-      var dy = end_touch.screenY - touch.screenY;
-      if ( Math.abs(dy) > Math.abs(dx) ) return;
-      if ( dx < -40 ) return nav_next();
-      if ( dx >  40 ) return nav_prev();
-    };
-  });
-  document.addEventListener("touchend", function(event) {
-    var touch = event.changedTouches[0];
-    touches[touch.identifier](touch);
-  });
-  document.addEventListener("touchcancel", function(event) {
-    touches.removeAttribute(event.target.changedTouches[0]);
-  });
-|}
-
 (* HELPERS *)
 
 let current_year = (Unix.time () |> Unix.gmtime).tm_year + 1900
@@ -74,7 +18,7 @@ let page ?(extra_head = []) (page_title : string) (contents : node list) =
         meta [ string_attr "property" "og:title"; content "%s" page_title; ];
         meta [ string_attr "property" "og:site_name"; content "Steve Purcell Photography"; ];
         meta [ string_attr "property" "og:type"; content "article"; ];
-        style [ type_ "text/css" ] "%s" site_css;
+        style [ type_ "text/css" ] "%s" [%blob "site.css"];
         script [ defer; string_attr "data-domain" "purcellimages.com"; src "https://plausible.io/js/script.js" ] "";
       ] @ extra_head);
     body [] [
@@ -128,7 +72,7 @@ let photo base_url (photo : Db.photo_meta) (context : Db.gallery_photo_context) 
   ] in
   page ~extra_head:og_tags
     page_title
-    [ navigation_js;
+    [ script [ async; lang "javascript" ] "%s" [%blob "nav.js"];
       article [ class_ "photo-page" ] [
         nav [] [
           ul [ class_ "horizontal" ] (

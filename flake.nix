@@ -21,6 +21,7 @@
 		caqti-driver-postgresql
                 ppx_deriving
                 lwt_ppx
+                ppx_blob
               ]);
             in f pkgs ocamlPackages ocamlDeps
            );
