@@ -1,3 +1,5 @@
+let (let*) = Lwt.bind
+
 (* From https://github.com/ocurrent/ocaml-ci/pull/760 *)
 let drop_trailing_slash next_handler request =
   let target = "///" ^ Dream.target request in
@@ -11,7 +13,7 @@ let site_base_url req =
   "https://" ^ (Dream.header req "host" |> Option.value ~default:"127.0.0.1")
 
 let handle_image loader req  = let photo_id = Dream.param req "photo_id" |> int_of_string in
-  let%lwt data = Dream.sql req (loader photo_id) in
+  let* data = Dream.sql req (loader photo_id) in
   let etag = "\"" ^ Digest.MD5.(string data |> to_hex) ^ "\"" in
   match Dream.header req "If-None-Match" with
   | Some t when t = etag -> Dream.empty ~headers:[("Etag", etag)] `Not_Modified
@@ -33,21 +35,21 @@ let () =
 
     Dream.get "/galleries/:name" (fun req ->
         let name = Dream.param req "name" in
-        let%lwt meta = Dream.sql req (Db.get_gallery_meta name) in
-        let%lwt photos = Dream.sql req (Db.get_gallery_photos name) in
+        let* meta = Dream.sql req (Db.get_gallery_meta name) in
+        let* photos = Dream.sql req (Db.get_gallery_photos name) in
         Dream_html.respond (Templates.gallery meta photos);
       );
 
     Dream.get "/galleries" (fun req ->
-        let%lwt galleries = Dream.sql req Db.get_galleries in
+        let* galleries = Dream.sql req Db.get_galleries in
         Dream_html.respond (Templates.galleries galleries);
       );
 
     Dream.get "/galleries/:name/:photo_id" (fun req ->
         let name = Dream.param req "name" in
         let photo_id = Dream.param req "photo_id" |> int_of_string in
-        let%lwt meta = Dream.sql req (Db.get_photo_meta photo_id) in
-        let%lwt context = Dream.sql req (Db.get_gallery_photo_context name photo_id) in
+        let* meta = Dream.sql req (Db.get_photo_meta photo_id) in
+        let* context = Dream.sql req (Db.get_gallery_photo_context name photo_id) in
         Dream_html.respond (Templates.photo (site_base_url req) meta context);
       );
   ]
