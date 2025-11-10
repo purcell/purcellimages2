@@ -23,7 +23,7 @@ bindings.
 
 ## Development flow
 
-A Nix flake provides all the necessry build tools.
+A Nix flake provides all the necessary build tools.
 
 In one terminal, I run `dune build --watch`, and then when the editor (Emacs in my case)
 runs `ocamllsp`, that will connect to Dune.
