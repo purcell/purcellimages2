@@ -5,45 +5,67 @@
     nixpkgs.url = "nixpkgs/nixpkgs-unstable";
   };
 
-  outputs = { self, nixpkgs }@inputs:
+  outputs =
+    { self, nixpkgs }@inputs:
     (
       let
         forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.platforms.all;
-        withDepsAndPkgs = f: forAllSystems (system:
+        withDepsAndPkgs =
+          f:
+          forAllSystems (
+            system:
             let
               pkgs = import nixpkgs { inherit system; };
               ocamlPackages = pkgs.ocamlPackages;
-              ocamlDeps = (with ocamlPackages; [
-                ocaml
-                dune_3
-		dream
-		dream-html
-		caqti-driver-postgresql
-                ppx_deriving
-                lwt_ppx
-                ppx_blob
-              ]);
-            in f pkgs ocamlPackages ocamlDeps
-           );
+              ocamlDeps = (
+                with ocamlPackages;
+                [
+                  ocaml
+                  dune_3
+                  dream
+                  dream-html
+                  caqti-driver-postgresql
+                  ppx_deriving
+                  lwt_ppx
+                  ppx_blob
+                ]
+              );
+            in
+            f pkgs { inherit ocamlPackages ocamlDeps; }
+          );
       in
       {
-        devShell = withDepsAndPkgs (pkgs: ocamlPackages: ocamlDeps:
-            pkgs.mkShell {
-              buildInputs = ocamlDeps ++ [ pkgs.entr ] ++ (with ocamlPackages; [ utop ocaml-lsp ocp-indent ]);
-              shellHook = ''
-                export OCAMLRUNPARAM=b
-              '';
-            }
+        devShell = withDepsAndPkgs (
+          pkgs:
+          { ocamlPackages, ocamlDeps }:
+          pkgs.mkShell {
+            buildInputs =
+              ocamlDeps
+              ++ [ pkgs.entr ]
+              ++ (with ocamlPackages; [
+                utop
+                ocaml-lsp
+                ocp-indent
+              ]);
+            shellHook = ''
+              export OCAMLRUNPARAM=b
+            '';
+          }
         );
 
-        defaultPackage = withDepsAndPkgs (pkgs: ocamlPackages: ocamlDeps:
+        defaultPackage = withDepsAndPkgs (
+          pkgs:
+          { ocamlPackages, ocamlDeps }:
           ocamlPackages.buildDunePackage {
             pname = "purcellimages";
             version = "";
             src = ./.;
             buildInputs = ocamlDeps;
+            meta = {
+              mainProgram = "site";
+            };
           }
-        ); 
+        );
       }
     );
 }
